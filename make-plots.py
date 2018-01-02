@@ -278,7 +278,7 @@ def TRENTO(ax, system):
     """
 
     *nch_estimators, nch_midrapidity = np.loadtxt(
-            '{}.dat'.format(system), usecols=(0, 1, 2, 3)
+            'cache/trento/{}.dat'.format(system), usecols=(0, 1, 2, 3)
             ).T
 
     x = np.linspace(0, 100, 20)
@@ -316,8 +316,8 @@ def main():
             pass
 
     plt.tight_layout()
-    for ax in axes:
-        ax.set_yscale('log')
+    #for ax in axes:
+    #    ax.set_yscale('log')
     plt.savefig('yields.pdf')
 
 

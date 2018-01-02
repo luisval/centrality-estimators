@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
+from itertools import islice, product
 import logging
 import multiprocessing
 import os
-import subprocess
-from itertools import islice, product
 from pathlib import Path
+import subprocess
 
 import h5py
 import numpy as np
 
 etamax = 5.1
 deta = 0.1
+
 
 def run_cmd(*args):
     """
@@ -108,7 +109,7 @@ def write_attr(args):
     """
     # progress
     sys, batchid = args
-    print(args)
+    print(*args)
 
     # centrality estimators
     V0A = [(2.8, 5.1)]
@@ -116,16 +117,19 @@ def write_attr(args):
     CL1 = [(-1.4, 1.4)]
     estimators = (V0A, V0M, CL1)
 
-    events_cache = 'events_{}.hdf'.format(os.getpid())
-    trento_events = trento(sys, norm=0.265, events=events_cache)
+    events_cache = Path('cache/trento/events_{}.hdf'.format(os.getpid()))
+    if not events_cache.parent.exists():
+        os.makedirs(events_cache.parent, exist_ok=True)
+
+    trento_events = trento(sys, norm=0.265, events=str(events_cache))
     attr = []
 
     for (ev, mult, e2, e3) in islice(trento_events, 10**3):
         nch_est = [dnch_deta(ev, eta_ranges) for eta_ranges in estimators]
         nch_mid = dnch_deta(ev, [(-.5, .5)])
-        attr.append([*nch_est, nch_mid, mult, e2, e3]) 
+        attr.append([*nch_est, nch_mid, mult, e2, e3])
 
-    filename = '{}.dat'.format(sys.replace(' ', ''))
+    filename = 'cache/trento/{}.dat'.format(sys.replace(' ', ''))
     with open(filename, 'ab') as f:
         np.savetxt(f, np.array(attr))
 
@@ -139,7 +143,7 @@ def main():
     repeat = 10
 
     # initial multiple processes
-    pool = multiprocessing.Pool(4).map(
+    multiprocessing.Pool(4).map(
         write_attr, product(systems, range(repeat))
         )
 
