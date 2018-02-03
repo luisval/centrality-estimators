@@ -140,7 +140,7 @@ def main():
 
     # trento parameters
     systems = ('p Pb', 'Pb Pb')
-    repeat = 10
+    repeat = 50
 
     # initial multiple processes
     multiprocessing.Pool(4).map(
